@@ -1,1 +1,50 @@
+name: Build
 
+on:
+  workflow_dispatch: {}
+  push: {}
+
+jobs:
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: pyinstaller --onefile --windowed --name HEIC2JPG --collect-all pillow_heif heic2jpg.py
+      - uses: actions/upload-artifact@v4
+        with:
+          name: HEIC2JPG-windows
+          path: dist/HEIC2JPG.exe
+
+  macos-arm:
+    runs-on: macos-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: pyinstaller --windowed --name HEIC2JPG --collect-all pillow_heif heic2jpg.py
+      - run: ditto -c -k --keepParent dist/HEIC2JPG.app HEIC2JPG-mac-apple-silicon.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: HEIC2JPG-mac-apple-silicon
+          path: HEIC2JPG-mac-apple-silicon.zip
+
+  macos-intel:
+    runs-on: macos-15-intel
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install -r requirements.txt
+      - run: pyinstaller --windowed --name HEIC2JPG --collect-all pillow_heif heic2jpg.py
+      - run: ditto -c -k --keepParent dist/HEIC2JPG.app HEIC2JPG-mac-intel.zip
+      - uses: actions/upload-artifact@v4
+        with:
+          name: HEIC2JPG-mac-intel
+          path: HEIC2JPG-mac-intel.zip
